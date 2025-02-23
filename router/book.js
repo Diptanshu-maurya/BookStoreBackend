@@ -64,7 +64,7 @@ router.delete("/delete-book",authenticateToken,async (req,res)=>{
 
 })
 
-router.get("/get-all-books",authenticateToken,async (req,res)=>{
+router.get("/get-all-books",async (req,res)=>{
     try {
        const book=await Book.find().sort({createdAt:-1});
        return res.status(200).json({message:"Success",data:book});
@@ -72,7 +72,7 @@ router.get("/get-all-books",authenticateToken,async (req,res)=>{
       res.status(500).json({message:"Intenal server error"});
     }
 })
-router.get("/get-recent-books",authenticateToken,async (req,res)=>{
+router.get("/get-recent-books",async (req,res)=>{
   try {
      const book=await Book.find().sort({createdAt:-1}).limit(4);
      return res.status(200).json({message:"Success",data:book});
