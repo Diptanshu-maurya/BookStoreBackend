@@ -6,28 +6,36 @@ const Book=require("../models/book");
 const Order=require("../models/order");
 
 
-router.post("/place-order",authenticateToken,async(req,res)=>{
+
+router.post("/place-order", authenticateToken, async (req, res) => {
   try {
-    const {id}=req.headers;
-    const {order}=req.body;
+    const { id } = req.headers;
+    const { order } = req.body;
 
-    for(const orderData of order){
-      const newOrder=new Order({user:id,book:orderData._id});
-      const orderDataFromDb=await newOrder.save();
-
-      await User.findByIdAndUpdate(id,{
-        $push:{orders:orderDataFromDb._id}
-      });
-
-      await User.findByIdAndUpdate(id,{
-        $pull:{cart:orderDataFromDb._id}
-      }); 
+    if (!order || order.length === 0) {
+      return res.status(400).json({ status: "Fail", message: "Order is empty" });
     }
-    return res.json({status:"Success",message:"Order placed succesfully"}); 
+
+    const orderIds = [];
+
+    for (const orderData of order) {
+      const newOrder = new Order({ user: id, book: orderData._id });
+      const orderDataFromDb = await newOrder.save();
+      orderIds.push(orderDataFromDb._id);
+    }
+
+    await User.findByIdAndUpdate(id, {
+      $push: { orders: { $each: orderIds } },
+      $set: { cart: [] }, // Clears the cart completely
+    });
+
+    return res.json({ status: "Success", message: "Order placed successfully" });
   } catch (error) {
-    return res.status(500).json({message:error});
+    console.error("Order placement error:", error);
+    return res.status(500).json({ status: "Error", message: error.message });
   }
-})
+});
+
 
 router.get("/get-order-history",authenticateToken,async(req,res)=>{
   try {

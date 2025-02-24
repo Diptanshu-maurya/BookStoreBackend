@@ -12,7 +12,7 @@ const order=mongoose.Schema({
    },
    status:{
     type:String,
-    default:"Order Placed",
+    default:"Order placed",
     enum:["Order placed","out for delivery","delivered","canceled"]
    }
 
