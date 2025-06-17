@@ -5,10 +5,11 @@ const User=require("../models/user");
 const jwt=require("jsonwebtoken");
 const {authenticateToken}=require("./userAuth");
 const Book=require("../models/book");
+const upload =require("../config/multer");
 
 //add book --admin
 
-router.post("/add-book",authenticateToken,async (req,res)=>{
+router.post("/add-book",authenticateToken,upload.single("image"),async (req,res)=>{
   
   try {
     const {id}=req.headers;
@@ -16,21 +17,31 @@ router.post("/add-book",authenticateToken,async (req,res)=>{
    if(user.role!=="admin"){
         return res.status(400).json({message:"You are not access to admin "})
    }
+   console.log(req.body);
+   
 
-    const book=new Book({
-        url:req.body.url,
-        title:req.body.title,
-        author:req.body.author,
-        price:req.body.price,
-        desc:req.body.desc,
-        language:req.body.language
+    // Build full image URL (assuming you serve /public statically)
+    const imageUrl = req.file ? `/images/${req.file.filename}` : "";
+
+    const book = new Book({
+      url: imageUrl,
+      title: req.body.title,
+      author: req.body.author,
+      price: req.body.price,
+      desc: req.body.description,
+      language: req.body.language,
     });
-     await book.save();
+    
+    await book.save();
+     
+     
+     
 
      res.status(200).json({message:"New book added succesfully"});
 
     
   } catch (error) {
+    
     res.status(500).json({message:"Intenal server error"});
   }
 })

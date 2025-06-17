@@ -13,6 +13,7 @@ const authenticateToken=(req,res,next)=>{
       return res.status(403).json({message:"token expired plz sign in again"});
     }
     req.user=user;
+    
     next();
   });
 }
